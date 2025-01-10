@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyLearn IDE - Professional Python Learning Platform</title>
+    <meta name="description" content="Professional Python IDE for learning and development">
+    <meta name="keywords" content="Python, IDE, Learning, Programming">
+    <meta property="og:title" content="PyLearn IDE">
+    <meta property="og:description" content="Learn Python programming with our interactive IDE">
+    
+    <link rel="preload" href="style.css" as="style">
+    <link rel="preload" href="main.js" as="script">
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.0/brython.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.0/brython_stdlib.min.js"></script>
+</head>
+<body onload="brython()">
+    <div class="container">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-code"></i>
+                PyLearn IDE
+                <span class="version">v1.0</span>
+            </div>
+            <div class="controls">
+                <button id="runCode" title="Run Code (Ctrl+Enter)"><i class="fas fa-play"></i> Run</button>
+                <button id="clearCode" title="Clear Editor"><i class="fas fa-trash"></i></button>
+                <button id="toggleTheme" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+                <button id="toggleResources" title="Learning Resources"><i class="fas fa-book"></i></button>
+            </div>
+        </nav>
+
+        <div class="main-content">
+            <div class="editor-container">
+                <div class="editor-header">
+                    <select id="codeExamples">
+                        <option value="">Select Example</option>
+                        <optgroup label="Basics">
+                            <option value="hello">Hello World</option>
+                            <option value="variables">Variables</option>
+                            <option value="operators">Operators</option>
+                        </optgroup>
+                        <optgroup label="Control Flow">
+                            <option value="loops">Loops</option>
+                            <option value="conditionals">Conditionals</option>
+                            <option value="functions">Functions</option>
+                        </optgroup>
+                        <optgroup label="Data Structures">
+                            <option value="lists">Lists</option>
+                            <option value="dictionaries">Dictionaries</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <textarea id="codeEditor" spellcheck="false">print("Welcome to PyLearn IDE!")
+# Start coding here
+name = input("What's your name? ")
+print(f"Hello, {name}!")</textarea>
+            </div>
+            
+            <div class="console-container">
+                <div class="console-header">
+                    Console Output
+                    <button id="clearConsole"><i class="fas fa-broom"></i></button>
+                </div>
+                <div id="consoleOutput"></div>
+            </div>
+        </div>
+
+        <div class="resources-panel">
+            <div class="resources-header">
+                <h3>Python Learning Resources</h3>
+                <button id="closeResources"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="resources-content">
+                <div class="resource-section">
+                    <h4>Python Basics</h4>
+                    <ul>
+                        <li data-example="variables"><i class="fas fa-code"></i> Variables and Data Types</li>
+                        <li data-example="operators"><i class="fas fa-calculator"></i> Operators</li>
+                        <li data-example="conditionals"><i class="fas fa-random"></i> If Statements</li>
+                        <li data-example="loops"><i class="fas fa-redo"></i> Loops</li>
+                        <li data-example="functions"><i class="fas fa-cube"></i> Functions</li>
+                        <li data-example="lists"><i class="fas fa-list"></i> Lists</li>
+                        <li data-example="dictionaries"><i class="fas fa-book"></i> Dictionaries</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/python">
+from browser import document, window, html
+import sys
+
+class ConsoleOutput:
+    def __init__(self):
+        self.console = document["consoleOutput"]
+    
+    def write(self, text):
+        self.console.innerHTML += str(text)
+    
+    def flush(self):
+        pass
+
+sys.stdout = ConsoleOutput()
+sys.stderr = ConsoleOutput()
+
+def run_code(ev):
+    console = document["consoleOutput"]
+    code = document["codeEditor"].value
+    console.innerHTML = ""
+    
+    try:
+        exec(code, globals())
+    except Exception as e:
+        console.innerHTML += f"<span class='error'>{str(e)}</span>"
+
+document["runCode"].bind("click", run_code)
+    </script>
+    <script src="python_runner.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
