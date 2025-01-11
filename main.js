@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const codeEditor = document.getElementById('codeEditor');
     const consoleOutput = document.getElementById('consoleOutput');
     const toggleTheme = document.getElementById('toggleTheme');
     const toggleResources = document.getElementById('toggleResources');
@@ -54,7 +53,7 @@ print(f"Person's age: {person['age']}")`
     document.querySelector('.editor-header').appendChild(statsContainer);
 
     const updateCodeStats = () => {
-        const code = codeEditor.value;
+        const code = editor.getValue();
         const stats = {
             lines: code.split('\n').length,
             characters: code.length,
@@ -64,141 +63,11 @@ print(f"Person's age: {person['age']}")`
         charCountElement.textContent = `Chars: ${stats.characters}`;
     };
 
-    class VersionControl {
-        constructor() {
-            this.versions = [];
-            this.currentVersion = -1;
-        }
-
-        saveVersion(code) {
-            this.versions = this.versions.slice(0, this.currentVersion + 1);
-            this.versions.push({
-                code: code,
-                timestamp: new Date().toISOString()
-            });
-            this.currentVersion++;
-            this.saveToLocalStorage();
-        }
-
-        undo() {
-            if (this.currentVersion > 0) {
-                this.currentVersion--;
-                return this.versions[this.currentVersion].code;
-            }
-            return null;
-        }
-
-        redo() {
-            if (this.currentVersion < this.versions.length - 1) {
-                this.currentVersion++;
-                return this.versions[this.currentVersion].code;
-            }
-            return null;
-        }
-
-        saveToLocalStorage() {
-            localStorage.setItem('code-versions', JSON.stringify({
-                versions: this.versions,
-                currentVersion: this.currentVersion
-            }));
-        }
-
-        loadFromLocalStorage() {
-            const saved = JSON.parse(localStorage.getItem('code-versions'));
-            if (saved) {
-                this.versions = saved.versions;
-                this.currentVersion = saved.currentVersion;
-            }
-        }
-    }
-
-    const versionControl = new VersionControl();
-    versionControl.loadFromLocalStorage();
-
-    setInterval(() => {
-        if (codeEditor.value) {
-            versionControl.saveVersion(codeEditor.value);
-            updateCodeStats();
-        }
-    }, 30000);
-
-    const formatCode = () => {
-        const lines = codeEditor.value.split('\n');
-        let indentLevel = 0;
-        const formattedLines = lines.map(line => {
-            const trimmedLine = line.trim();
-            if (trimmedLine.endsWith(':')) {
-                const formatted = '    '.repeat(indentLevel) + trimmedLine;
-                indentLevel++;
-                return formatted;
-            } else if (trimmedLine === '') {
-                return '';
-            }
-            return '    '.repeat(indentLevel) + trimmedLine;
-        });
-        codeEditor.value = formattedLines.join('\n');
-        updateCodeStats();
-    };
-
-    const fileManager = {
-        saveToStorage(filename, content) {
-            const files = JSON.parse(localStorage.getItem('pylearn-files') || '{}');
-            files[filename] = {
-                content: content,
-                lastModified: new Date().toISOString()
-            };
-            localStorage.setItem('pylearn-files', JSON.stringify(files));
-        },
-
-        exportToFile(filename, content) {
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename.endsWith('.py') ? filename : `${filename}.py`;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        }
-    };
-
-    const shortcuts = {
-        'Control+s': (e) => {
-            e.preventDefault();
-            saveFile.click();
-        },
-        'Control+z': () => {
-            const code = versionControl.undo();
-            if (code) {
-                codeEditor.value = code;
-                updateCodeStats();
-            }
-        },
-        'Control+y': () => {
-            const code = versionControl.redo();
-            if (code) {
-                codeEditor.value = code;
-                updateCodeStats();
-            }
-        },
-        'Control+Enter': () => document.getElementById('runCode').click(),
-        'Control+l': () => clearConsole.click(),
-        'Control+Shift+f': formatCode
-    };
-
-    document.addEventListener('keydown', (e) => {
-        const key = `${e.ctrlKey ? 'Control+' : ''}${e.shiftKey ? 'Shift+' : ''}${e.key}`;
-        if (shortcuts[key]) {
-            e.preventDefault();
-            shortcuts[key](e);
-        }
-    });
-
     const handleExampleClick = (exampleKey) => {
         if (examples[exampleKey]) {
-            codeEditor.value = examples[exampleKey];
-            localStorage.setItem('pylearn-code', codeEditor.value);
+            consoleOutput.innerHTML = '';
+            editor.setValue(examples[exampleKey]);
+            localStorage.setItem('pylearn-code', editor.getValue());
             updateCodeStats();
             const selectedElement = document.querySelector(`[data-example="${exampleKey}"]`);
             if (selectedElement) {
@@ -219,8 +88,8 @@ print(f"Person's age: {person['age']}")`
         handleExampleClick(codeExamples.value);
     });
 
-    codeEditor.addEventListener('input', () => {
-        versionControl.saveVersion(codeEditor.value);
+    editor.on('change', () => {
+        localStorage.setItem('pylearn-code', editor.getValue());
         updateCodeStats();
     });
 
@@ -244,7 +113,7 @@ print(f"Person's age: {person['age']}")`
     });
 
     clearCode.addEventListener('click', () => {
-        codeEditor.value = '';
+        editor.setValue('');
         localStorage.setItem('pylearn-code', '');
         updateCodeStats();
     });
@@ -252,7 +121,7 @@ print(f"Person's age: {person['age']}")`
     saveFile.addEventListener('click', () => {
         const filename = prompt('Enter filename to save:', 'script.py');
         if (filename) {
-            fileManager.saveToStorage(filename, codeEditor.value);
+            fileManager.saveToStorage(filename, editor.getValue());
             consoleOutput.innerHTML += `<div class="output-success">File "${filename}" saved successfully!</div>`;
         }
     });
@@ -260,7 +129,7 @@ print(f"Person's age: {person['age']}")`
     exportFile.addEventListener('click', () => {
         const filename = prompt('Enter filename to export:', 'script.py');
         if (filename) {
-            fileManager.exportToFile(filename, codeEditor.value);
+            fileManager.exportToFile(filename, editor.getValue());
             consoleOutput.innerHTML += `<div class="output-success">File "${filename}" exported successfully!</div>`;
         }
     });
@@ -272,11 +141,9 @@ print(f"Person's age: {person['age']}")`
 
     const savedCode = localStorage.getItem('pylearn-code');
     if (savedCode) {
-        codeEditor.value = savedCode;
-        updateCodeStats();
-    } else {
-        updateCodeStats();
+        editor.setValue(savedCode);
     }
+    updateCodeStats();
 });
 
 // Add after existing initialization code
@@ -284,12 +151,12 @@ const visualizer = new CodeVisualizer();
 
 // Add visualization toggle handlers
 document.getElementById('toggleFlowEditor').addEventListener('click', () => {
-    visualizer.updateFlowDiagram(codeEditor.value);
+    visualizer.updateFlowDiagram(editor.getValue());
     document.querySelector('.visualization-panel').classList.toggle('active');
 });
 
 document.getElementById('toggleDataView').addEventListener('click', () => {
-    visualizer.updateDataView(codeEditor.value);
+    visualizer.updateDataView(editor.getValue());
     document.querySelector('.visualization-panel').classList.toggle('active');
 });
 
