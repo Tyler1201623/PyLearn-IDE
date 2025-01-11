@@ -11,13 +11,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const examples = {
         hello: 'print("Hello, World!")',
-        variables: 'name = "Python"\nage = 30\nprint(f"Name: {name}, Age: {age}")',
-        operators: 'a = 10\nb = 5\nprint(f"Sum: {a + b}")\nprint(f"Product: {a * b}")',
-        conditionals: 'age = 18\nif age >= 18:\n    print("Adult")\nelse:\n    print("Minor")',
+        variables: `# Input and display user information
+name = input("Enter your name: ")
+age = input("Enter your age: ")
+print(f"Name: {name}, Age: {age}")`,
+        operators: `# Basic arithmetic operations
+a = int(input("Enter first number: "))
+b = int(input("Enter second number: "))
+print(f"Sum: {a + b}")
+print(f"Product: {a * b}")`,
+        conditionals: `# Age verification program
+age = int(input("Enter your age: "))
+if age >= 18:
+    print("You are an Adult")
+else:
+    print("You are a Minor")`,
         loops: 'for i in range(5):\n    print(f"Count: {i}")',
-        functions: 'def greet(name):\n    return f"Hello, {name}!"\n\nprint(greet("Python Learner"))',
+        functions: `def greet(name):
+    return f"Hello, {name}!"
+
+user_name = input("Enter your name: ")
+print(greet(user_name))`,
         lists: 'fruits = ["apple", "banana", "orange"]\nfor fruit in fruits:\n    print(fruit)',
-        dictionaries: 'person = {\n    "name": "John",\n    "age": 30\n}\nprint(person["name"])'
+        dictionaries: `person = {
+    "name": input("Enter name: "),
+    "age": input("Enter age: ")
+}
+print(f"Person's name: {person['name']}")
+print(f"Person's age: {person['age']}")`
     };
 
     const statsContainer = document.createElement('div');
@@ -149,20 +170,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Enhanced examples with better click handling
     const handleExampleClick = (exampleKey) => {
         if (examples[exampleKey]) {
             codeEditor.value = examples[exampleKey];
             localStorage.setItem('pylearn-code', codeEditor.value);
             updateCodeStats();
-            // Add visual feedback
             const selectedElement = document.querySelector(`[data-example="${exampleKey}"]`);
-            selectedElement.classList.add('selected');
-            setTimeout(() => selectedElement.classList.remove('selected'), 500);
+            if (selectedElement) {
+                selectedElement.classList.add('selected');
+                setTimeout(() => selectedElement.classList.remove('selected'), 500);
+            }
         }
     };
 
-    // Add click listeners to both dropdown and sidebar examples
     document.querySelectorAll('[data-example]').forEach(element => {
         element.addEventListener('click', () => {
             const exampleKey = element.getAttribute('data-example');
@@ -170,7 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Handle dropdown changes
     codeExamples.addEventListener('change', () => {
         handleExampleClick(codeExamples.value);
     });
@@ -193,14 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeResources.addEventListener('click', () => {
         resourcesPanel.classList.remove('active');
-    });
-
-    codeExamples.addEventListener('change', () => {
-        if (examples[codeExamples.value]) {
-            codeEditor.value = examples[codeExamples.value];
-            localStorage.setItem('pylearn-code', codeEditor.value);
-            updateCodeStats();
-        }
     });
 
     clearConsole.addEventListener('click', () => {

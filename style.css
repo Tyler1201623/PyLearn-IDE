@@ -11,6 +11,8 @@
     --warning-color: #f1c40f;
     --border-radius: 8px;
     --transition-speed: 0.3s;
+    --error-bg: rgba(231, 76, 60, 0.1);
+    --suggestion-bg: rgba(52, 152, 219, 0.1);
 }
 
 /* Base Styles */
@@ -151,6 +153,15 @@ body {
     align-items: center;
 }
 
+/* Code Stats */
+.code-stats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.9em;
+    color: var(--text-color);
+    opacity: 0.8;
+}
+
 /* Output Types */
 .output-success {
     color: var(--success-color);
@@ -168,61 +179,31 @@ body {
     background: rgba(231, 76, 60, 0.1);
 }
 
-/* Responsive Design */
-@media (min-width: 768px) {
-    .main-content {
-        flex-direction: row;
-        gap: 1.5rem;
-    }
-    
-    .editor-container {
-        width: 60%;
-        height: calc(100vh - 120px);
-    }
-    
-    .console-container {
-        width: 40%;
-        height: calc(100vh - 120px);
-    }
-}
-
-@media (max-width: 767px) {
-    .editor-container, .console-container {
-        height: 50vh;
-    }
-    
-    #codeEditor, #consoleOutput {
-        font-size: clamp(12px, 3vw, 14px);
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.editor-container, .console-container {
-    animation: fadeIn 0.5s ease-out;
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.1);
+/* Error Handling */
+.error-container {
+    background: var(--error-bg);
+    border-left: 4px solid var(--error-color);
+    padding: 1rem;
+    margin: 0.5rem 0;
     border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb {
-    background: var(--accent-color);
-    border-radius: 4px;
+.error-type {
+    color: var(--error-color);
+    font-weight: bold;
+    font-size: 1.1em;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: #2980b9;
+.error-message {
+    color: var(--text-color);
+    margin: 0.5rem 0;
+}
+
+.error-suggestion {
+    background: var(--suggestion-bg);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
 }
 
 /* Resources Panel */
@@ -252,36 +233,7 @@ body {
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--accent-color);
 }
-  .resource-section li {
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 4px;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-  }
 
-  .resource-section li:hover {
-      background-color: var(--accent-color);
-      color: white;
-  }
-  .resource-section li.selected {
-      background-color: var(--accent-color);
-      color: white;
-      transform: translateX(5px);
-  }
-@media (max-width: 768px) {
-    .resources-panel {
-        width: 100vw;
-        right: -100vw;
-    }
-    
-    .resource-section li {
-        padding: 0.8rem;
-    }
-}
-/* Resource Sections */
 .resource-section {
     margin-bottom: 1.5rem;
 }
@@ -307,6 +259,14 @@ body {
 
 .resource-section li:hover {
     color: var(--accent-color);
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.resource-section li.selected {
+    background-color: var(--accent-color);
+    color: white;
+    transform: translateX(5px);
 }
 
 /* Form Elements */
@@ -319,28 +279,59 @@ select, input {
     font-size: clamp(12px, 1.4vw, 14px);
 }
 
-/* Utility Classes */
-.error { color: var(--error-color); }
-.success { color: var(--success-color); }
-.warning { color: var(--warning-color); }
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
 
-/* Media Queries */
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #2980b9;
+}
+
+/* Dark Theme */
+.dark-theme {
+    --primary-color: #1a1a1a;
+    --secondary-color: #2d2d2d;
+    --editor-bg: #1e1e1e;
+    --console-bg: #1a1a1a;
+}
+
+/* Responsive Design */
 @media (min-width: 768px) {
     .main-content {
         flex-direction: row;
     }
     
-    .console-container {
-        width: 40%;
-        height: auto;
-    }
-    
     .editor-container {
         width: 60%;
+        height: calc(100vh - 120px);
+    }
+    
+    .console-container {
+        width: 40%;
+        height: calc(100vh - 120px);
     }
 }
 
 @media (max-width: 767px) {
+    .editor-container, .console-container {
+        height: 50vh;
+    }
+    
+    #codeEditor, #consoleOutput {
+        font-size: clamp(12px, 3vw, 14px);
+    }
+    
     .controls button span {
         display: none;
     }
@@ -351,6 +342,15 @@ select, input {
     
     .logo .version {
         display: none;
+    }
+    
+    .resources-panel {
+        width: 100vw;
+        right: -100vw;
+    }
+    
+    .resource-section li {
+        padding: 0.8rem;
     }
 }
 
@@ -372,46 +372,12 @@ select, input {
     }
 }
 
-/* Dark Theme */
-.dark-theme {
-    --primary-color: #1a1a1a;
-    --secondary-color: #2d2d2d;
-    --editor-bg: #1e1e1e;
-    --console-bg: #1a1a1a;
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.error-container {
-    background: var(--error-bg);
-    border-left: 4px solid var(--error-color);
-    padding: 1rem;
-    margin: 0.5rem 0;
-    border-radius: 4px;
-}
-
-.error-type {
-    color: var(--error-color);
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.error-message {
-    color: var(--text-color);
-    margin: 0.5rem 0;
-}
-
-.error-suggestion {
-    background: var(--suggestion-bg);
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin-top: 0.5rem;
-}
-
-@media (max-width: 768px) {
-    .error-container {
-        padding: 0.75rem;
-    }
-    
-    .error-type {
-        font-size: 1em;
-    }
+.editor-container, .console-container {
+    animation: fadeIn 0.5s ease-out;
 }

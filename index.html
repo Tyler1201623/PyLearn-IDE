@@ -92,8 +92,18 @@ print(f"Hello, {name}!")</textarea>
     </div>
 
     <script type="text/python">
-from browser import document, window, html
+from browser import document, window, html, prompt
 import sys
+
+class ConsoleInput:
+    def __init__(self):
+        pass
+    
+    def readline(self):
+        user_input = prompt.prompt("Input required:")
+        if user_input is None:
+            user_input = ""
+        return user_input + "\n"
 
 class ConsoleOutput:
     def __init__(self):
@@ -107,6 +117,7 @@ class ConsoleOutput:
 
 sys.stdout = ConsoleOutput()
 sys.stderr = ConsoleOutput()
+sys.stdin = ConsoleInput()
 
 def run_code(ev):
     console = document["consoleOutput"]
