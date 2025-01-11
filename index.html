@@ -16,6 +16,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.0/brython.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/brython/3.11.0/brython_stdlib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/vis-network.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/gridjs"></script>
 </head>
 <body onload="brython()">
     <div class="container">
@@ -30,9 +34,10 @@
                 <button id="clearCode" title="Clear Editor"><i class="fas fa-trash"></i></button>
                 <button id="toggleTheme" title="Toggle Theme"><i class="fas fa-moon"></i></button>
                 <button id="toggleResources" title="Learning Resources"><i class="fas fa-book"></i></button>
+                <button id="saveFile" title="Save File (Ctrl+S)"><i class="fas fa-save"></i> Save</button>
+                <button id="exportFile" title="Export File"><i class="fas fa-file-export"></i> Export</button>
             </div>
         </nav>
-
         <div class="main-content">
             <div class="editor-container">
                 <div class="editor-header">
@@ -131,7 +136,23 @@ def run_code(ev):
 
 document["runCode"].bind("click", run_code)
     </script>
+    
+    <div class="visualization-panel">
+        <div class="viz-header">
+            <h3>Visualizations</h3>
+            <div class="viz-controls">
+                <button id="toggleFlowEditor"><i class="fas fa-project-diagram"></i> Flow Editor</button>
+                <button id="toggleDataView"><i class="fas fa-table"></i> Data View</button>
+                <button id="togglePlotView"><i class="fas fa-chart-line"></i> Plot View</button>
+            </div>
+        </div>
+        <div id="flowEditor" class="viz-content"></div>
+        <div id="dataViewer" class="viz-content"></div>
+        <div id="plotViewer" class="viz-content"></div>
+    </div>
+
     <script src="python_runner.js"></script>
     <script src="main.js"></script>
+    <script src="visualizations.js"></script>
 </body>
 </html>

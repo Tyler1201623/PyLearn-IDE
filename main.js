@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const codeExamples = document.getElementById('codeExamples');
     const clearConsole = document.getElementById('clearConsole');
     const clearCode = document.getElementById('clearCode');
+    const saveFile = document.getElementById('saveFile');
+    const exportFile = document.getElementById('exportFile');
 
     const examples = {
         hello: 'print("Hello, World!")',
@@ -138,10 +140,33 @@ print(f"Person's age: {person['age']}")`
         updateCodeStats();
     };
 
+    const fileManager = {
+        saveToStorage(filename, content) {
+            const files = JSON.parse(localStorage.getItem('pylearn-files') || '{}');
+            files[filename] = {
+                content: content,
+                lastModified: new Date().toISOString()
+            };
+            localStorage.setItem('pylearn-files', JSON.stringify(files));
+        },
+
+        exportToFile(filename, content) {
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename.endsWith('.py') ? filename : `${filename}.py`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        }
+    };
+
     const shortcuts = {
-        'Control+s': () => {
-            versionControl.saveVersion(codeEditor.value);
-            updateCodeStats();
+        'Control+s': (e) => {
+            e.preventDefault();
+            saveFile.click();
         },
         'Control+z': () => {
             const code = versionControl.undo();
@@ -166,7 +191,7 @@ print(f"Person's age: {person['age']}")`
         const key = `${e.ctrlKey ? 'Control+' : ''}${e.shiftKey ? 'Shift+' : ''}${e.key}`;
         if (shortcuts[key]) {
             e.preventDefault();
-            shortcuts[key]();
+            shortcuts[key](e);
         }
     });
 
@@ -224,6 +249,22 @@ print(f"Person's age: {person['age']}")`
         updateCodeStats();
     });
 
+    saveFile.addEventListener('click', () => {
+        const filename = prompt('Enter filename to save:', 'script.py');
+        if (filename) {
+            fileManager.saveToStorage(filename, codeEditor.value);
+            consoleOutput.innerHTML += `<div class="output-success">File "${filename}" saved successfully!</div>`;
+        }
+    });
+
+    exportFile.addEventListener('click', () => {
+        const filename = prompt('Enter filename to export:', 'script.py');
+        if (filename) {
+            fileManager.exportToFile(filename, codeEditor.value);
+            consoleOutput.innerHTML += `<div class="output-success">File "${filename}" exported successfully!</div>`;
+        }
+    });
+
     if (localStorage.getItem('pylearn-theme') === 'dark') {
         document.body.classList.add('dark-theme');
         toggleTheme.innerHTML = '<i class="fas fa-sun"></i>';
@@ -236,4 +277,34 @@ print(f"Person's age: {person['age']}")`
     } else {
         updateCodeStats();
     }
+});
+
+// Add after existing initialization code
+const visualizer = new CodeVisualizer();
+
+// Add visualization toggle handlers
+document.getElementById('toggleFlowEditor').addEventListener('click', () => {
+    visualizer.updateFlowDiagram(codeEditor.value);
+    document.querySelector('.visualization-panel').classList.toggle('active');
+});
+
+document.getElementById('toggleDataView').addEventListener('click', () => {
+    visualizer.updateDataView(codeEditor.value);
+    document.querySelector('.visualization-panel').classList.toggle('active');
+});
+
+document.getElementById('togglePlotView').addEventListener('click', () => {
+    // Example plot data
+    const plotData = {
+        labels: ['January', 'February', 'March'],
+        datasets: [{
+            label: 'Sample Data',
+            data: [65, 59, 80],
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    };
+    visualizer.updatePlotView(plotData);
+    document.querySelector('.visualization-panel').classList.toggle('active');
 });
