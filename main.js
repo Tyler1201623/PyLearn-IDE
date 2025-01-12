@@ -1,4 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize resource manager
+    const resourceManager = new ResourceManager({
+        documentation: {
+            title: 'Python Documentation',
+            items: [
+                { name: 'Official Python Docs', url: 'https://docs.python.org/3/' },
+                { name: 'Python Tutorial', url: 'https://docs.python.org/3/tutorial/' },
+                { name: 'Language Reference', url: 'https://docs.python.org/3/reference/' }
+            ]
+        },
+        tutorials: {
+            title: 'Interactive Tutorials',
+            items: [
+                { name: 'Basic Syntax', content: 'Learn Python syntax basics' },
+                { name: 'Data Structures', content: 'Master Python data structures' },
+                { name: 'Functions & Classes', content: 'Object-oriented programming' }
+            ]
+        },
+        exercises: {
+            title: 'Practice Exercises',
+            items: [
+                { name: 'Beginner Challenges', difficulty: 'Easy' },
+                { name: 'Intermediate Problems', difficulty: 'Medium' },
+                { name: 'Advanced Projects', difficulty: 'Hard' }
+            ]
+        }
+    });
+
     const consoleOutput = document.getElementById('consoleOutput');
     const toggleTheme = document.getElementById('toggleTheme');
     const toggleResources = document.getElementById('toggleResources');
@@ -42,6 +70,7 @@ print(f"Person's name: {person['name']}")
 print(f"Person's age: {person['age']}")`
     };
 
+    // Code Stats Setup
     const statsContainer = document.createElement('div');
     statsContainer.className = 'code-stats';
     const lineCountElement = document.createElement('span');
@@ -63,6 +92,7 @@ print(f"Person's age: {person['age']}")`
         charCountElement.textContent = `Chars: ${stats.characters}`;
     };
 
+    // Example Handling
     const handleExampleClick = (exampleKey) => {
         if (examples[exampleKey]) {
             consoleOutput.innerHTML = '';
@@ -77,6 +107,7 @@ print(f"Person's age: {person['age']}")`
         }
     };
 
+    // Event Listeners
     document.querySelectorAll('[data-example]').forEach(element => {
         element.addEventListener('click', () => {
             const exampleKey = element.getAttribute('data-example');
@@ -98,10 +129,12 @@ print(f"Person's age: {person['age']}")`
         const isDark = document.body.classList.contains('dark-theme');
         toggleTheme.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
         localStorage.setItem('pylearn-theme', isDark ? 'dark' : 'light');
+        editor.setOption('theme', isDark ? 'monokai' : 'default');
     });
 
     toggleResources.addEventListener('click', () => {
         resourcesPanel.classList.toggle('active');
+        resourceManager.loadResourceContent();
     });
 
     closeResources.addEventListener('click', () => {
@@ -118,10 +151,17 @@ print(f"Person's age: {person['age']}")`
         updateCodeStats();
     });
 
+    // File Operations
     saveFile.addEventListener('click', () => {
         const filename = prompt('Enter filename to save:', 'script.py');
         if (filename) {
-            fileManager.saveToStorage(filename, editor.getValue());
+            const blob = new Blob([editor.getValue()], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
             consoleOutput.innerHTML += `<div class="output-success">File "${filename}" saved successfully!</div>`;
         }
     });
@@ -129,14 +169,45 @@ print(f"Person's age: {person['age']}")`
     exportFile.addEventListener('click', () => {
         const filename = prompt('Enter filename to export:', 'script.py');
         if (filename) {
-            fileManager.exportToFile(filename, editor.getValue());
+            const blob = new Blob([editor.getValue()], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
             consoleOutput.innerHTML += `<div class="output-success">File "${filename}" exported successfully!</div>`;
         }
     });
 
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            saveFile.click();
+        }
+        if (e.ctrlKey && e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('runCode').click();
+        }
+    });
+
+    // Layout Updates
+    window.addEventListener('resize', () => {
+        editor.refresh();
+        updateLayout();
+    });
+
+    function updateLayout() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+
+    // Initial Setup
     if (localStorage.getItem('pylearn-theme') === 'dark') {
         document.body.classList.add('dark-theme');
         toggleTheme.innerHTML = '<i class="fas fa-sun"></i>';
+        editor.setOption('theme', 'monokai');
     }
 
     const savedCode = localStorage.getItem('pylearn-code');
@@ -144,34 +215,5 @@ print(f"Person's age: {person['age']}")`
         editor.setValue(savedCode);
     }
     updateCodeStats();
-});
-
-// Add after existing initialization code
-const visualizer = new CodeVisualizer();
-
-// Add visualization toggle handlers
-document.getElementById('toggleFlowEditor').addEventListener('click', () => {
-    visualizer.updateFlowDiagram(editor.getValue());
-    document.querySelector('.visualization-panel').classList.toggle('active');
-});
-
-document.getElementById('toggleDataView').addEventListener('click', () => {
-    visualizer.updateDataView(editor.getValue());
-    document.querySelector('.visualization-panel').classList.toggle('active');
-});
-
-document.getElementById('togglePlotView').addEventListener('click', () => {
-    // Example plot data
-    const plotData = {
-        labels: ['January', 'February', 'March'],
-        datasets: [{
-            label: 'Sample Data',
-            data: [65, 59, 80],
-            fill: false,
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1
-        }]
-    };
-    visualizer.updatePlotView(plotData);
-    document.querySelector('.visualization-panel').classList.toggle('active');
+    updateLayout();
 });
