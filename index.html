@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="PyLearn IDE - A next-generation Python learning environment"
+    />
+    <meta
+      name="keywords"
+      content="Python, IDE, learning, programming, education"
+    />
+    <meta name="author" content="PyLearn Team" />
+
+    <!-- Open Graph / Social Media Meta Tags -->
+    <meta property="og:title" content="PyLearn IDE" />
+    <meta
+      property="og:description"
+      content="Interactive Python learning environment with visualizations and real-time feedback"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pylearnide.com" />
+    <meta property="og:image" content="assets/logo.png" />
+
+    <title>PyLearn IDE</title>
+
+    <!-- Preload critical assets -->
+    <link rel="preload" href="style.css" as="style" />
+    <link rel="preload" href="python_runner.js" as="script" />
+
+    <!-- Favicons -->
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon" />
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/lib/codemirror.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/theme/monokai.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/dist/vis-network.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/gridjs/dist/theme/mermaid.min.css"
+    />
+
+    <!-- External Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/lib/codemirror.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/mode/python/python.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/edit/matchbrackets.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.2/addon/edit/closebrackets.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/brython@3.12.0/brython_stdlib.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vis-network@9.1.2/dist/dist/vis-network.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gridjs/dist/gridjs.umd.js"></script>
+  </head>
+  <body onload="brython()">
+    <div class="app-container">
+      <!-- Navigation bar -->
+      <header class="navbar">
+        <div class="logo">
+          <img
+            src="assets/logo.png"
+            alt="PyLearn IDE Logo"
+            style="height: 60px; width: auto"
+          />
+          <h1>PyLearn IDE</h1>
+        </div>
+        <div class="nav-controls">
+          <div class="dropdown">
+            <button id="loadExampleBtn" class="btn-secondary">
+              <i class="fas fa-book"></i> Load Example
+            </button>
+            <div class="dropdown-content">
+              <a href="#" data-example="basic">Basic Python</a>
+              <a href="#" data-example="functions">Functions</a>
+              <a href="#" data-example="classes">Classes</a>
+              <a href="#" data-example="data">Data Visualization</a>
+              <a href="#" data-example="algorithms">Algorithms</a>
+            </div>
+          </div>
+          <button id="runButton" class="btn-primary">
+            <i class="fas fa-play"></i> Run
+          </button>
+          <button id="visualizeToggle" class="btn-secondary">
+            <i class="fas fa-chart-bar"></i> Visualize
+          </button>
+          <button id="helpButton" class="btn-icon">
+            <i class="fas fa-question-circle"></i>
+          </button>
+          <button id="settingsButton" class="btn-icon">
+            <i class="fas fa-cog"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main content -->
+      <main class="main-content">
+        <!-- Editor panel -->
+        <div class="editor-container">
+          <div class="editor-header">
+            <h2>Python Editor</h2>
+            <div class="editor-controls">
+              <button id="formatCode" class="btn-icon" title="Format Code">
+                <i class="fas fa-indent"></i>
+              </button>
+              <button id="autocomplete" class="btn-icon" title="Auto-complete">
+                <i class="fas fa-magic"></i>
+              </button>
+            </div>
+          </div>
+          <div id="codeEditor"></div>
+        </div>
+
+        <!-- Right panel (Console & Visualizations) -->
+        <div class="right-panel">
+          <!-- Console output -->
+          <div class="console-container" id="consoleContainer">
+            <div class="console-header" id="consoleHeader">
+              <span>Console Output</span>
+              <button id="consoleToggle" class="btn-icon">
+                <i class="fas fa-chevron-up"></i>
+              </button>
+            </div>
+            <div class="console-output" id="consoleOutput">
+              <div class="console-empty-message">
+                Run your code to see output here
+              </div>
+            </div>
+            <div class="console-actions">
+              <button id="clearConsole" class="btn-text">Clear</button>
+            </div>
+            <div class="resize-handle" id="consoleResizeHandle"></div>
+          </div>
+
+          <!-- Visualization panel -->
+          <div class="visualization-container" id="visualizationContainer">
+            <div class="visualization-header">
+              <div class="visualization-tabs">
+                <button class="visualization-tab active" data-tab="dataView">
+                  Data View
+                </button>
+                <button class="visualization-tab" data-tab="graphView">
+                  Graph View
+                </button>
+                <button class="visualization-tab" data-tab="flowView">
+                  Code Flow
+                </button>
+              </div>
+              <div class="visualization-controls">
+                <button
+                  id="downloadViz"
+                  class="btn-icon"
+                  title="Download Visualization"
+                >
+                  <i class="fas fa-download"></i>
+                </button>
+              </div>
+            </div>
+            <div class="visualization-content">
+              <div id="dataView" class="viz-tab-content active">
+                <div class="empty-state-message">
+                  <i class="fas fa-info-circle"></i>
+                  <p>Run your code to visualize data</p>
+                </div>
+              </div>
+              <div id="graphView" class="viz-tab-content">
+                <div class="empty-state-message">
+                  <i class="fas fa-info-circle"></i>
+                  <p>Run your code to generate graphs</p>
+                </div>
+              </div>
+              <div id="flowView" class="viz-tab-content">
+                <div class="empty-state-message">
+                  <i class="fas fa-info-circle"></i>
+                  <p>Run your code to visualize code flow</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resources panel (collapsed by default) -->
+        <div class="resources-panel" id="resourcesPanel">
+          <div class="resources-header">
+            <h2>Learning Resources</h2>
+            <button id="closeResources" class="btn-icon">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="resources-content" id="resourcesContent">
+            <!-- Loaded dynamically -->
+          </div>
+        </div>
+      </main>
+
+      <!-- Toast notifications -->
+      <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <!-- Python Brython handler -->
+    <script type="text/python" id="python-handler">
+      from browser import document, window, alert
+      import sys
+      import json
+      import traceback
+
+      # Create a bridge to communicate with visualizer
+      class PyLearnVisualizerBridge:
+          def __init__(self):
+              self.visualizer = window.pyLearnVisualizer
+
+          def update_data_view(self, data):
+              """Update the data view with Python variables"""
+              if self.visualizer:
+                  # Convert Python data to JSON
+                  data_json = json.dumps(data)
+                  self.visualizer.updateDataView(data_json)
+
+          def update_graph_view(self, data=None):
+              """Update the graph view with data"""
+              if self.visualizer:
+                  if data is None:
+                      data = {}
+                  data_json = json.dumps(data)
+                  self.visualizer.updateGraphView(data_json)
+
+          def update_flow_view(self, code):
+              """Update the code flow visualization"""
+              if self.visualizer:
+                  self.visualizer.updateFlowView(code)
+
+      # Create visualizer bridge
+      visualizer_bridge = PyLearnVisualizerBridge()
+
+      # Custom stdout to capture print output
+      class PyLearnOutput:
+          def __init__(self):
+              self.console = document.getElementById("consoleOutput")
+
+          def write(self, text):
+              # Remove empty console message if present
+              empty_msg = self.console.querySelector(".console-empty-message")
+              if empty_msg:
+                  self.console.removeChild(empty_msg)
+
+              # Create a new line element
+              line = document.createElement("div")
+              line.className = "console-line"
+              line.textContent = text
+              self.console.appendChild(line)
+
+              # Auto-scroll to bottom
+              self.console.scrollTop = self.console.scrollHeight
+
+          def flush(self):
+              pass
+
+      # Custom input handler
+      def custom_input(prompt=None):
+          if prompt:
+              document.getElementById("consoleOutput").innerHTML += f'<div class="console-line prompt">{prompt}</div>'
+
+          # Create custom input field
+          input_container = document.createElement("div")
+          input_container.className = "console-input-container"
+
+          input_field = document.createElement("input")
+          input_field.className = "console-input-field"
+          input_field.setAttribute("type", "text")
+
+          submit_btn = document.createElement("button")
+          submit_btn.className = "console-input-submit"
+          submit_btn.innerHTML = '<i class="fas fa-arrow-right"></i>'
+
+          input_container.appendChild(input_field)
+          input_container.appendChild(submit_btn)
+
+          document.getElementById("consoleOutput").appendChild(input_container)
+          input_field.focus()
+
+          # Wait for input using Promise
+          def wait_for_input():
+              result = None
+
+              def on_submit(event):
+                  nonlocal result
+                  result = input_field.value
+                  input_container.innerHTML = f'<div class="console-line input-result">{result}</div>'
+                  document.getElementById("consoleOutput").removeChild(input_container)
+                  document.getElementById("consoleOutput").appendChild(input_container)
+
+              submit_btn.bind("click", on_submit)
+              input_field.bind("keypress", lambda event: on_submit(event) if event.code == "Enter" else None)
+
+              while result is None:
+                  # Wait for input
+                  pass
+
+              return result
+
+          return wait_for_input()
+
+      # Capture global variables for visualization
+      def capture_variables():
+          """Capture global variables for visualization"""
+          variables = {}
+          for var_name, value in globals().items():
+              # Skip internal variables and modules
+              if not var_name.startswith("__") and not var_name.startswith("_") and var_name not in ["sys", "json", "document", "window", "alert", "PyLearnOutput", "run_code", "capture_variables", "custom_input", "traceback", "visualizer_bridge"]:
+                  try:
+                      # Try to serialize to JSON to ensure it's visualizable
+                      json.dumps({var_name: value})
+                      variables[var_name] = value
+                  except:
+                      # Skip non-serializable values
+                      pass
+          return variables
+
+      # Replace stdout with custom console output
+      sys.stdout = PyLearnOutput()
+      sys.stderr = sys.stdout
+
+      # Replace built-in input with custom input
+      __builtins__.input = custom_input
+
+      def run_code(code):
+          """Execute Python code and update visualizations"""
+          try:
+              # Clear previous output
+              document.getElementById("consoleOutput").innerHTML = ""
+
+              # Update code flow visualization before execution
+              visualizer_bridge.update_flow_view(code)
+
+              # Execute the code
+              exec(code, globals())
+
+              # Capture variables and update visualizations
+              variables = capture_variables()
+              visualizer_bridge.update_data_view(variables)
+              visualizer_bridge.update_graph_view()
+
+              # Show success message
+              document.getElementById("consoleOutput").innerHTML += '<div class="console-line success">Code executed successfully.</div>'
+
+          except Exception as e:
+              # Show error message
+              error_msg = f'<div class="console-line error">{str(e)}</div>'
+              stack_trace = f'<div class="console-line error-trace">{traceback.format_exc()}</div>'
+              document.getElementById("consoleOutput").innerHTML += error_msg + stack_trace
+
+      # Expose run_code to JavaScript
+      window.pyRunCode = run_code
+    </script>
+
+    <!-- Application JavaScript -->
+    <script src="python_runner.js"></script>
+    <script src="visualizations.js"></script>
+    <script src="resources.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
