@@ -40,10 +40,6 @@ PyLearn IDE is a cutting-edge, browser-based Python development environment spec
 - **Keyboard Shortcuts** - Productivity-enhancing shortcuts
 - **Responsive Design** - Works on desktop and mobile devices
 
-## 🔍 Live Demo
-
-Try PyLearn IDE right now at [https://pylearnide.com](https://pylearnide.com)
-
 ## 🖥️ Installation
 
 ### Local Setup
